@@ -75,6 +75,15 @@
 
 .hero-title .portrait-image{top:2%;bottom:auto;width:clamp(300px,39vw,560px);mix-blend-mode:normal;filter:none;z-index:2}.hero-bottom{position:absolute;bottom:7%;left:0;right:0;justify-content:center;text-align:center}.hero-bottom p{max-width:420px}.hero-title h1{position:relative;z-index:3}@media(max-width:700px){.hero-title .portrait-image{top:4%;width:72vw}.hero-bottom{bottom:4%}}
 
+@media (max-width:700px) {
+  .services h2,.projects>h2,.timeline h2 { font-size:48px;line-height:1;letter-spacing:0;width:auto;max-width:100%; }
+  .contact h2 { font-size:36px;line-height:1.05;letter-spacing:0;max-width:100%; }
+}
+@media (max-width:380px) {
+  .services h2,.projects>h2,.timeline h2 { font-size:40px; }
+  .contact h2 { font-size:30px; }
+}
+
 /* Keep every bold display element on the same Segoe UI Black face. */
 h1,h2,h3,h4,h5,h6,strong{font-family:'Segoe UI Black','Arial Black',Impact,sans-serif;font-weight:900}
 
