@@ -4,9 +4,10 @@ export default function ResilientImage({ src, loading = 'lazy', ...props }) {
   return <ImageRequest key={src} src={src} loading={loading} {...props} />;
 }
 
-function ImageRequest({ src, loading, ...props }) {
+function ImageRequest({ src, loading, onLoad, ...props }) {
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const timer = useRef(null);
   useEffect(() => () => clearTimeout(timer.current), []);
   useEffect(() => {
@@ -25,8 +26,8 @@ function ImageRequest({ src, loading, ...props }) {
     url.searchParams.set('image-retry', String(attempt));
     return url.href;
   })() : src;
-  return <img {...props} src={request} loading={loading} decoding="async"
-    onLoad={() => { clearTimeout(timer.current); setFailed(false); }}
+  return <img {...props} src={request} loading={loading} decoding="async" data-loaded={loaded}
+    onLoad={(event) => { clearTimeout(timer.current); setFailed(false); setLoaded(true); onLoad?.(event); }}
     onError={() => {
       clearTimeout(timer.current);
       setFailed(true);

@@ -5,6 +5,7 @@ import { projects, jobs, education } from "./data";
 import "./styles.css";
 import Hero from "./Hero";
 import ResilientImage from './ResilientImage';
+import CarouselRow from './CarouselRow';
 import webImages from './web-images.json';
 const imageDimensions = (src) => webImages.dimensions[src.replace(import.meta.env.BASE_URL, '')] || {};
 const carouselAssets = import.meta.glob('../首页轮播图片/*/*.{png,jpg,jpeg,webp,avif,gif}', {
@@ -17,7 +18,7 @@ const carouselRows = ['第一行', '第二行', '第三行', '第四行', '第�
   images: Object.entries(carouselAssets)
     .filter(([path]) => path.split('/').at(-2) === folder)
     .sort(([a], [b]) => a.split('/').at(-1).localeCompare(b.split('/').at(-1), 'zh-CN', { numeric: true }))
-    .map(([path, src]) => ({ src, thumbnail: `${import.meta.env.BASE_URL}${webImages.carousel[path].src}`, name: path.split('/').at(-1).replace(/\.[^.]+$/, '') })),
+    .map(([path, src]) => ({ src, thumbnail: `${import.meta.env.BASE_URL}${webImages.carousel[path].src}`, placeholder: webImages.carousel[path].placeholder, name: path.split('/').at(-1).replace(/\.[^.]+$/, '') })),
 }));
 const services = [
   ["01", "视觉设计", "品牌、海报、宣传物料与完整视觉系统。"],
@@ -74,21 +75,7 @@ function App() {
       </header>
       <Hero />
       <section className="dual-carousel" aria-label="作品预览">
-        {carouselRows.map(({ folder, images }, rowIndex) => (
-          <div className={`carousel-row ${rowIndex % 2 ? 'reverse' : 'forward'}`} key={folder} aria-label={folder}>
-            <div className="carousel-track" style={{ '--group-width': `${Math.max(images.length, 6) * 316}px` }}>
-              {[0, 1].map((copy) => (
-                <div className="carousel-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>
-                  {images.length ? images.map(({ src, thumbnail, name }) => (
-                    <button type="button" className="carousel-card" key={src} tabIndex={copy === 1 ? -1 : 0} aria-label={`查看原图：${name}`} onClick={() => setPreview({ src, name })}>
-                      <ResilientImage src={thumbnail} alt={copy === 0 ? name : ''} draggable="false" width="300" height="190" loading="eager" fetchPriority="low" />
-                    </button>
-                  )) : Array.from({ length: 6 }, (_, i) => <div className="carousel-card" key={i} />)}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+        {carouselRows.map((row, rowIndex) => <CarouselRow key={row.folder} {...row} rowIndex={rowIndex} onPreview={setPreview} />)}
       </section>
       <section id="about" className="dark about">
         <span className="kicker">01 / ABOUT ME</span>

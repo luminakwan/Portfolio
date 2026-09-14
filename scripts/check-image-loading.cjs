@@ -18,6 +18,7 @@ const assert = require('node:assert/strict');
       assert.equal(requests.filter(url => /\/assets\/.*\.(png|jpe?g)/.test(url)).length, 0, 'Original carousel images must not load on entry');
       assert.equal(requests.filter(url => /\/assets\/\d+-\d+\.webp/.test(url)).length, 0, 'Projects must not load above the fold');
       const initialRequests = requests.length;
+      assert(requests.filter(url => /\/thumbnails\/[a-f0-9]+\.webp/.test(url)).length < 46, 'Distant carousel rows must wait');
       await page.screenshot({ path: `.preview/images-${viewport.width}-hero.png` });
       await page.locator('.dual-carousel').scrollIntoViewIfNeeded();
       await page.addStyleTag({ content: '.carousel-track { animation-play-state: paused !important; }' });
@@ -33,6 +34,17 @@ const assert = require('node:assert/strict');
       await page.locator('dialog[open] > img').evaluate(img => img.decode());
       assert(requests.some(url => /\/assets\/.*\.(png|jpe?g)/.test(url)), 'Opening the preview must request the original');
       await page.getByRole('button', { name: '关闭原图预览' }).click();
+      for (const row of await page.locator('.carousel-row').all()) {
+        await row.scrollIntoViewIfNeeded();
+        await row.locator('img').first().waitFor();
+        await row.locator('img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
+        const sizes = await row.evaluate(row => {
+          const group = row.querySelector('.carousel-group');
+          const count = group.children.length;
+          return { actual: group.getBoundingClientRect().width, expected: count * (innerWidth <= 700 ? 226 : 316) };
+        });
+        assert.equal(sizes.actual, sizes.expected, 'Mobile and desktop loops must match group width');
+      }
       for (const project of await page.locator('.stack-card').all()) {
         await project.scrollIntoViewIfNeeded();
         const images = project.locator('.art-column img');
@@ -41,6 +53,9 @@ const assert = require('node:assert/strict');
           await img.evaluate(img => img.decode());
         }
       }
+      await first.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      await page.screenshot({ path: `.preview/images-${viewport.width}-ready.png` });
       assert.deepEqual(errors, []);
       console.log(JSON.stringify({ viewport, initialImageRequests: initialRequests, projectsDecoded: await page.locator('.art-column img').count(), result: 'passed' }));
       await page.close();
@@ -66,6 +81,21 @@ const assert = require('node:assert/strict');
     await failedPage.evaluate(() => window.dispatchEvent(new Event('online')));
     await failedPage.waitForFunction(() => document.querySelector('.portrait-image')?.naturalWidth > 0);
     console.log('Retry recovery, retry limit, and online recovery: passed');
+    const slow = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    let release;
+    const pending = new Promise(resolve => { release = resolve; });
+    await slow.route(/\/thumbnails\/[a-f0-9]+\.webp/, async route => { await pending; await route.continue(); });
+    await slow.goto('http://127.0.0.1:4175/Portfolio/', { waitUntil: 'domcontentloaded' });
+    const row = slow.locator('.carousel-row').first();
+    await row.scrollIntoViewIfNeeded();
+    assert.equal(await row.locator('.carousel-track').evaluate(el => el.style.animationPlayState), 'paused');
+    assert((await row.locator('button').first().evaluate(el => el.style.backgroundImage)).includes('data:image/webp'));
+    await slow.screenshot({ path: '.preview/slow-placeholder.png' });
+    release();
+    await slow.waitForFunction(() => document.querySelector('.carousel-track').style.animationPlayState === 'running');
+    await slow.locator('#contact').scrollIntoViewIfNeeded();
+    await slow.waitForFunction(() => document.querySelector('.carousel-track').style.animationPlayState === 'paused');
+    console.log('Slow-image placeholders, ready-state animation, offscreen pause: passed');
   } finally {
     await browser.close();
   }
