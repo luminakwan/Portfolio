@@ -1,0 +1,71 @@
+.hero.hero--layered {
+  --portrait-size: min(62vw, 68svh, 720px);
+  position: relative;
+  isolation: isolate;
+  height: 100svh;
+  gap: 24px;
+}
+
+.hero--layered .hero-title {
+  flex: 0 0 auto;
+  width: 100%;
+  height: var(--portrait-size);
+  margin: auto 0;
+}
+
+.hero--layered .hero-title .portrait-image {
+  top: 0;
+  bottom: auto;
+  left: 50%;
+  width: var(--portrait-size);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  transform: translateX(-50%);
+  mix-blend-mode: normal;
+  filter: none;
+  z-index: 1;
+}
+
+/* Keep the name over the collar as the portrait changes size. */
+.hero--layered .hero-title h1 {
+  position: absolute;
+  top: 82%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  margin: 0;
+  font-size: 128px;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.hero--layered .hero-bottom {
+  position: static;
+  justify-content: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1600px) {
+  .hero--layered .hero-title h1 { font-size: 160px; }
+}
+
+@media (max-width: 1199px) {
+  .hero--layered .hero-title h1 { font-size: 96px; }
+}
+
+@media (max-width: 900px) {
+  .hero--layered .hero-title h1 { font-size: 64px; }
+}
+
+@media (max-width: 600px) {
+  .hero.hero--layered { --portrait-size: min(92vw, 66svh); }
+  .hero--layered .hero-title h1 { font-size: 40px; }
+}
+
+@media (max-width: 380px) {
+  .hero--layered .hero-title h1 { font-size: 32px; }
+}
