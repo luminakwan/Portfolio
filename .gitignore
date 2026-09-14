@@ -2,3 +2,5 @@ node_modules/
 dist/
 .preview/
 *.log
+public/thumbnails/
+src/web-images.json
