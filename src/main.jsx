@@ -148,6 +148,16 @@ function App() {
                             key={j}
                             src={src}
                             alt={`${p.title} ${j * 2 + 1}`}
+                            role="button"
+                            tabIndex={0}
+                            style={{ cursor: 'zoom-in' }}
+                            onClick={() => setPreview({ src, name: `${p.title} ${j * 2 + 1}` })}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                setPreview({ src, name: `${p.title} ${j * 2 + 1}` });
+                              }
+                            }}
                           />
                         ))}
                     </div>
@@ -159,6 +169,16 @@ function App() {
                             key={j}
                             src={src}
                             alt={`${p.title} ${j * 2 + 2}`}
+                            role="button"
+                            tabIndex={0}
+                            style={{ cursor: 'zoom-in' }}
+                            onClick={() => setPreview({ src, name: `${p.title} ${j * 2 + 2}` })}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                setPreview({ src, name: `${p.title} ${j * 2 + 2}` });
+                              }
+                            }}
                           />
                         ))}
                     </div>
